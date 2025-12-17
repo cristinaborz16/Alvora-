@@ -112,5 +112,33 @@ router.post("/logout", async (req, res) => {
   res.json({ message: "Logout successful." });
 });
 
+// GET SESSION
+router.get("/session", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ message: "No authentication token provided." });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const payload = jwt.verify(token, JWT_SECRET);
+    const user = await User.findById(payload.userId).select("-passwordHash");
+
+    if (!user) {
+      return res.status(401).json({ message: "User not found." });
+    }
+
+    res.json({
+      user: {
+        id: user._id.toString(),
+        email: user.email,
+        full_name: user.full_name,
+        faculty: user.faculty
+      }
+    });
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid or expired token." });
+  }
+});
 
 export default router;
