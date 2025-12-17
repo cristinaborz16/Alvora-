@@ -3,6 +3,7 @@ import cors from "cors";
 import morgan from "morgan";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import authMiddleware from "./middleware/authMiddleware.js";
 
 dotenv.config();
 
@@ -32,6 +33,10 @@ mongoose
 // rute
 app.get("/", (req, res) => {
   res.json({ message: "Backend is running" });
+});
+
+app.get("/api/me", authMiddleware, (req, res) => {
+  res.json({ message: "User autenticat", user: req.user });
 });
 
 const PORT = process.env.PORT || 5001;
