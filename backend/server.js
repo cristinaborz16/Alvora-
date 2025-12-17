@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import authMiddleware from "./middleware/authMiddleware.js";
 import authRoutes from "./routes/auth.js";
 import groupsRoutes from "./routes/groups.js";
+import profilesRoutes from "./routes/profiles.js";
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.get("/", (req, res) => {
 });
 app.use("/api/auth", authRoutes);
 app.use("/api/groups", groupsRoutes);
+app.use("/api/profiles", profilesRoutes);
 
 app.get("/api/me", authMiddleware, (req, res) => {
   res.json({ message: "User autenticat", user: req.user });
