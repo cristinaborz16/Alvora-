@@ -4,6 +4,7 @@ import morgan from "morgan";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import authMiddleware from "./middleware/authMiddleware.js";
+import groupsRoutes from "./routes/groups.js";
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ mongoose
 app.get("/", (req, res) => {
   res.json({ message: "Backend is running" });
 });
+app.use("/api/groups", groupsRoutes);
 
 app.get("/api/me", authMiddleware, (req, res) => {
   res.json({ message: "User autenticat", user: req.user });
