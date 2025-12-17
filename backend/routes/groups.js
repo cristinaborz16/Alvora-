@@ -72,5 +72,73 @@ router.get("/:id", authMiddleware, async (req, res) => {
   }
 });
 
+// CREATE GROUP
+router.post("/", authMiddleware, async (req, res) => {
+  try {
+    const { name, description, faculty, year, course } = req.body;
+
+    if (!name || !faculty || !year) {
+      return res.status(400).json({ message: "Complete all required fields." });
+    }
+
+    const group = await Group.create({
+      name: name.trim(),
+      description: description?.trim() || null,
+      faculty,
+      year: parseInt(year),
+      course: course?.trim() || null,
+      created_by: req.user.id,
+    });
+
+    await GroupMember.create({
+      group_id: group._id,
+      user_id: req.user.id,
+    });
+
+    res.status(201).json({
+      message: "Group created successfully.",
+      group: {
+        id: group._id.toString(),
+        name: group.name,
+        faculty: group.faculty,
+        year: group.year,
+        course: group.course,
+        description: group.description,
+        created_by: group.created_by.toString(),
+      },
+    });
+  } catch (err) {
+    console.error("Create group error:", err);
+    res.status(500).json({ message: "Failed to create group." });
+  }
+});
+
+// DELETE GROUP
+router.delete("/:id", authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const group = await Group.findById(id);
+
+    if (!group) {
+      return res.status(404).json({ message: "Group not found." });
+    }
+
+    if (group.created_by.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Only group creator can delete the group." });
+    }
+
+    await GroupMember.deleteMany({ group_id: id });
+    await Message.deleteMany({ group_id: id });
+    await Group.findByIdAndDelete(id);
+
+    res.json({ message: "Group deleted successfully." });
+  } catch (err) {
+    console.error("Delete group error:", err);
+    res.status(500).json({ message: "Failed to delete group." });
+  }
+});
+
+
 export default router;
 
