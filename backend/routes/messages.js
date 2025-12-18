@@ -42,5 +42,55 @@ router.get("/group/:groupId", authMiddleware, async (req, res) => {
   }
 });
 
+// SEND MESSAGE
+router.post("/", authMiddleware, async (req, res) => {
+  try {
+    const { group_id, text, file_url, file_name, type } = req.body;
+
+    if (!group_id) {
+      return res.status(400).json({ message: "Group ID is required." });
+    }
+
+    if (!text && !file_url) {
+      return res.status(400).json({ message: "Message text or file is required." });
+    }
+
+    const message = await Message.create({
+      group_id,
+      user_id: req.user.id,
+      text: text?.trim() || null,
+      file_url: file_url || null,
+      file_name: file_name || null,
+      type: type || "text",
+    });
+
+    const user = await User.findById(req.user.id).select("full_name email");
+
+    const messageWithProfile = {
+      id: message._id.toString(),
+      group_id: message.group_id.toString(),
+      user_id: message.user_id.toString(),
+      text: message.text,
+      file_url: message.file_url,
+      file_name: message.file_name,
+      type: message.type,
+      created_at: message.createdAt,
+      profiles: user ? {
+        id: user._id.toString(),
+        full_name: user.full_name,
+        email: user.email,
+      } : { full_name: "Utilizator", email: "" },
+    };
+
+    res.status(201).json({
+      message: "Message sent successfully.",
+      data: messageWithProfile,
+    });
+  } catch (err) {
+    console.error("Send message error:", err);
+    res.status(500).json({ message: "Failed to send message." });
+  }
+});
+
 export default router;
 
