@@ -343,7 +343,7 @@ const GroupChat = () => {
         )}
 
         {/* Input Bar */}
-        <div className="sticky bottom-0 bg-background border-t border-border p-4">
+        <div className="sticky bottom-0 bg-background border-t border-border p-4 z-20">
           <div className="flex items-center gap-2">
             <input
               ref={imageInputRef}
