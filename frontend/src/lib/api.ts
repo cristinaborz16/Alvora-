@@ -1,5 +1,4 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:5001/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:5001/api";
 
 const getAuthToken = () => {
   return localStorage.getItem("auth_token");
@@ -30,9 +29,7 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   });
 
   if (!response.ok) {
-    const error = await response
-      .json()
-      .catch(() => ({ message: "Request failed" }));
+    const error = await response.json().catch(() => ({ message: "Request failed" }));
     throw new Error(error.message || "Request failed");
   }
 
@@ -41,12 +38,7 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
 
 export const api = {
   auth: {
-    register: async (
-      email: string,
-      password: string,
-      fullName: string,
-      faculty: string
-    ) => {
+    register: async (email: string, password: string, fullName: string, faculty: string) => {
       const data = await apiRequest("/auth/register", {
         method: "POST",
         body: JSON.stringify({ email, password, fullName, faculty }),
@@ -83,13 +75,7 @@ export const api = {
     getById: async (id: string) => {
       return apiRequest(`/groups/${id}`);
     },
-    create: async (
-      name: string,
-      description: string,
-      faculty: string,
-      year: number,
-      course?: string
-    ) => {
+    create: async (name: string, description: string, faculty: string, year: number, course?: string) => {
       return apiRequest("/groups", {
         method: "POST",
         body: JSON.stringify({ name, description, faculty, year, course }),
@@ -111,6 +97,17 @@ export const api = {
       });
     },
   },
+  messages: {
+    getByGroup: async (groupId: string) => {
+      return apiRequest(`/messages/group/${groupId}`);
+    },
+    send: async (group_id: string, text?: string, file_url?: string, file_name?: string, type?: string) => {
+      return apiRequest("/messages", {
+        method: "POST",
+        body: JSON.stringify({ group_id, text, file_url, file_name, type }),
+      });
+    },
+  },
   profiles: {
     getMe: async () => {
       return apiRequest("/profiles/me");
@@ -119,4 +116,36 @@ export const api = {
       return apiRequest("/profiles");
     },
   },
+  storage: {
+    upload: async (file: File, groupId: string) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("groupId", groupId);
+
+      const token = getAuthToken();
+      const headers: HeadersInit = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/storage/upload`, {
+        method: "POST",
+        headers,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: "Upload failed" }));
+        throw new Error(error.message || "Upload failed");
+      }
+
+      const data = await response.json();
+      const baseUrl = API_BASE_URL.replace("/api", "");
+      if (data.url && !data.url.startsWith("http")) {
+        data.url = `${baseUrl}${data.url}`;
+      }
+      return data;
+    },
+  },
 };
+
