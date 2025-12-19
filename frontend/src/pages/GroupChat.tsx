@@ -87,8 +87,16 @@ const GroupChat = () => {
     };
   }, [groupId, navigate]);
 
+  const [lastMessageId, setLastMessageId] = useState<string | null>(null);
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messages.length > 0) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg.id !== lastMessageId) {
+        setLastMessageId(lastMsg.id);
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }
+    }
   }, [messages]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, isImage: boolean) => {
