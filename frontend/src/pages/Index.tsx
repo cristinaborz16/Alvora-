@@ -233,7 +233,7 @@ tutori și colaboratori pentru proiecte academice.</p>
               </p>
             </div>
             <div className="text-center md:text-right text-muted-foreground">
-              <p>© 2024 Alvora. Toate drepturile rezervate.</p>
+              <p>© 2025 Alvora. Toate drepturile rezervate.</p>
               <p className="mt-1">Universitatea Româno-Americană</p>
             </div>
           </div>
